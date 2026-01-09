@@ -98,24 +98,94 @@ Final Summary (Your Metaphor)
 #include <stdlib.h>
 #include <math.h>
 
+
+// === 4. Initialize weights and bias (randomly or fixed) ===
+
+#define TARGET_VALUE  1.0
+#define NON_TARGET    0.0
+
+// z needs to be near from the target.
+
+// Define constants for initial values
+#define INIT_W1    0.3  // Initial weight for input 1
+#define INIT_W2    0.4  // Initial weight for input 2
+#define INIT_BIAS  -0.5  // Initial bias (threshold)
+
+// Define learning rate
+#define LEARNING_RATE  0.5
+
+#define EPOCH_MAX  20
+
+// =======
+
 // -----------------------------
 // ReLU Activation Function
 // -----------------------------
-double relu(double z) {
+double relu(double z) 
+{
     return (z > 0) ? z : 0;  // If z > 0 → z, else → 0
 }
 
 // -----------------------------
 // Derivative of ReLU (for backprop)
 // -----------------------------
-double relu_derivative(double z) {
+// So: the values returned by relu_derivative (0.0 or 1.0) are 
+// not related to the target values directly. 
+// They’re related to the activation state of the neuron. 
+
+double relu_derivative(double z) 
+{
     return (z > 0) ? 1.0 : 0.0;  // If z > 0 → slope=1, else → slope=0
 }
 
 // -----------------------------
 // Main Function
 // -----------------------------
-int main(int argc, char *argv[]) {
+
+/*
+-----------------------------------
+1. Inputs
+   - Two input values
+
+-----------------------------------
+2. Weights and Bias
+   - Weight - Control how much each input matters.
+   - Bias   - The bias, which shifts the threshold for activation.
+
+    Weights: how much each input matters
+    Trust levels: (w1, w2) tell the neuron how strongly to believe each input.
+    Effect: Larger 'wi' means that input pushes the neuron’s decision more.
+    Interpretation: If w1 > w2, the neuron trusts x1 more than x2.
+
+-----------------------------------
+3. Linear Combination
+4. Activation Function (ReLU)
+5. Target Output
+6. Error Calculation
+7. Backpropagation
+8. Training Loop
+*/
+
+/*
+What The Program Demonstrates
+ + Forward pass: computing output from inputs.
+ + Error measurement: comparing prediction vs target.
+ + Backpropagation: adjusting weights to reduce error.
+ + Learning: after training, the neuron correctly models AND logic.
+*/
+
+/*
+Mental Model Recap
+ + Inputs = keys
+ + Weights = trust in each key
+ + Bias = difficulty of opening
+ + Activation = safe mechanism
+ + Training = teaching the safe to only open when both keys are present
+*/
+
+int main(int argc, char *argv[]) 
+{
+
     // === 1. Check command line input ===
     if (argc != 3) {
         printf("Usage: %s <input1> <input2>\n", argv[0]);
@@ -132,15 +202,33 @@ int main(int argc, char *argv[]) {
     printf("Input: [%.0f, %.0f]\n", x1, x2);
 
     // === 3. Define target (correct answer) ===
+    // It’s the “truth” or “label” in machine learning terms.
+    // We need to get a smaller error changing the weights 
+    // when the target was reached.
     // We want: 1 1 → YES (1), others → NO (0)
-    double target = (x1 == 1.0 && x2 == 1.0) ? 1.0 : 0.0;
+
+    //double target = (x1 == 1.0 && x2 == 1.0) ? 1.0 : 0.0;
+    double target = 
+        (x1 == 1.0 && x2 == 1.0) 
+        ? TARGET_VALUE 
+        : NON_TARGET;
+
     printf("Target output: %.0f\n", target);
 
+
     // === 4. Initialize weights and bias (randomly or fixed) ===
+/*
     double w1 = 0.3;   // Weight for input 1
     double w2 = 0.4;   // Weight for input 2
     double b  = -0.5;  // Bias
     double learning_rate = 0.5;  // How much to adjust per step
+*/
+
+    double w1 = INIT_W1;  // Initial weight for input 1
+    double w2 = INIT_W2;  // Initial weight for input 2
+    double b  = INIT_BIAS;
+
+    double learning_rate = LEARNING_RATE;
 
     printf("\nInitial weights: w1=%.3f, w2=%.3f, bias=%.3f\n", w1, w2, b);
 
@@ -151,19 +239,26 @@ int main(int argc, char *argv[]) {
 
     // === 6. TRAINING LOOP (10 epochs) ===
     printf("\n--- Training Start (Backpropagation) ---\n");
-    for (int epoch = 1; epoch <= 10; epoch++) {
+    for (int epoch = 1; epoch <= EPOCH_MAX; epoch++) {
         // ---- Forward Pass ----
         z = w1 * inputs[0] + w2 * inputs[1] + b;
         double output = relu(z);
 
         // ---- Compute Error ----
-        double error = target - output;  // How wrong are we?
+        double error = (target - output);  // How wrong are we?
 
         // ---- If ReLU is off (z <= 0), no learning! ----
         if (z <= 0 && target > 0) {
             printf("Epoch %2d: DEAD NEURON (z=%.3f <=0), no update!\n", epoch, z);
             continue;
         }
+
+        // Its a very small number
+        //if (fabs(error) < 1e-6) {
+            // error is close enough to zero
+            //break;
+        //}
+
 
         // ---- Backpropagation: Compute gradients ----
         double d_output = error;                    // dL/d_output
@@ -190,6 +285,10 @@ int main(int argc, char *argv[]) {
     printf("\n--- Training Complete ---\n");
     printf("Final z = %.3f → Final output = %.3f\n", z, final_output);
     printf("Final decision: %s\n", (final_output > 0) ? "YES" : "NO");
+
+    // === Print Optimal Parameters === 
+    printf("Optimal weights and bias found:\n"); 
+    printf("w1=%.6f, w2=%.6f, bias=%.6f\n", w1, w2, b);
 
     return 0;
 }
