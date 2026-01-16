@@ -119,11 +119,16 @@ Final Summary (Your Metaphor)
 // =======
 
 // -----------------------------
-// ReLU Activation Function
+// ReLU Activation Function - (rectifier)
 // -----------------------------
+// ReLU: Rectified Linear Unit
+// It outputs the input directly if it is positive; otherwise, it will output zero.
+// If z > 0 → z, else → 0
+// See:
+// https://en.wikipedia.org/wiki/Rectified_linear_unit
 double relu(double z) 
 {
-    return (z > 0) ? z : 0;  // If z > 0 → z, else → 0
+    return (z > 0) ? z : 0;
 }
 
 // -----------------------------

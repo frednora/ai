@@ -1,0 +1,68 @@
+
+The Linear Algebra Connection
+
+    z = w1*x1 + w2*x2 + b
+
+This is a linear combination of the inputs x1, x2.
+
+--------------------------------
+In Linear Algebra terms:
+
+Inputs form a vector: 
+
+    x = [x1, x2]
+
+Weights form another vector: 
+
+    w = [w1, w2]
+
+The dot product: 
+That’s exactly the linear part of our neuron:
+The dot product measures how much two vectors “line up” with each other.
+ + If they point in the same direction → large positive value.
+ + If they’re perpendicular → zero.
+ + If they point opposite → negative value.
+
+    w[dot]x = w1x1 + w2x2
+    w.x     = w1x1 + w2x2
+
+So ?: (canonical neuron equation)
+
+    w[dot]x + b
+    w.x + b
+
+Add bias b: 
+shifts the line (or hyperplane in higher dimensions).
+
+That’s why neural networks are often described as 
+“linear algebra engines with non-linear activations.”
+
+-------------------------------------
+Connection between backface culling and bias in NN.
+(backface culling and neuron activation)
+
+Connection to Neural Nets
+Notice how similar this is to your earlier neuron metaphor:
+
+Dot product = 
+    alignment test (inputs vs. weights, or face vs. camera).
+
+Bias/threshold = 
+    deciding whether the alignment is “enough” to count.
+
+ReLU/culling = 
+   if the result is negative, shut it off (don’t draw / don’t fire).
+
+
+-----------
+Decision boundary: the equation 
+    w[dot]x + b = 0 
+defines the separating line/plane.
+
+The neuron computes:
+
+    z = w[dot]x + b 
+
+The sign of this value decides the “direction” of the outcome: 
+fire or not fire, draw or cull.
+
