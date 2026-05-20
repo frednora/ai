@@ -1,16 +1,16 @@
-
 /*
+
 # 1. Save code as nn.c
+
 # 2. Compile
-gcc -o nn nn.c -lm
+    gcc -o nn nn.c -lm
 
 # 3. Run examples
-./nn 1 1    # Should learn → YES
-./nn 1 0    # Should stay → NO
-./nn 0 0    # Should stay → NO
-./nn 0 1    # Should stay → NO
+    ./nn 1 1    # Should learn → YES
+    ./nn 1 0    # Should stay  → NO
+    ./nn 0 0    # Should stay  → NO
+    ./nn 0 1    # Should stay  → NO
 */
-
 
 /*
 
@@ -18,13 +18,15 @@ gcc -o nn nn.c -lm
 Input: [1, 1]
 Target output: 1
 
-Initial weights: w1=0.300, w2=0.400, bias=-0.500
+Initial weights: 
+    w1=0.300, w2=0.400, bias = -0.500
 
-BEFORE training: z = 0.200 → output = 0.200
+BEFORE training: 
+    z = 0.200 → output = 0.200
 
 --- Training Start (Backpropagation) ---
-Epoch  1: output=0.200, error=0.800 → w1=0.700, w2=0.800, b=-0.100
-Epoch  2: output=1.400, error=-0.400 → w1=0.500, w2=0.600, b=-0.300
+Epoch  1: output=0.200, error= 0.800 → w1=0.700, w2=0.800, b = -0.100
+Epoch  2: output=1.400, error=-0.400 → w1=0.500, w2=0.600, b = -0.300
 ...
 Epoch 10: output=0.900, error=0.100 → ...
 
@@ -35,19 +37,19 @@ Final decision: YES
 */
 
 /*
-Let’s give you a clear, real-world metaphor so you can see the example 
-in your mind every time you run ./nn 1 2.
+Let’s give you a clear, real-world metaphor so 
+you can see the example in your mind every time you run ./nn 1 2.
 
 Metaphor: "Can I open the safe?"
 The Safe Has 2 LocksLock
-Needs to be...
+Needs to be ...
 Key #1 Inserted (1)
 Key #2 Inserted (1)
 Only if BOTH keys are inserted → Safe opens!
 
 Your Neural Network = The Safe’s BrainIt receives 2 inputs (the keys):
 
-./nn 1 1   → Both keys in → Safe opens → YES
+./nn 1 1   → Both keys in    → Safe opens        → YES
 ./nn 1 0   → One key missing → Safe stays closed → NO
 
 The Weights = "How important is each key?"
@@ -56,14 +58,12 @@ w1            How much Key #1 matters
 w2            How much Key #2 matters
 b             The threshold — how hard it is to open
 
-
 Training = Teaching the Safe How to Recognize Both Keys
 Step     What Happens
 1        You try: ./nn 1 1 → should say YES, but it says NO
 2        Backpropagation: "Ah! Both keys were in — I should’ve opened!"
 3        Adjust w1, w2, b → make it easier to open when both are 1
 4        Repeat → safe learns: only 1+1 opens it
-
 
 Final Behavior (After Training)
 Command    Input    Output    Safe
@@ -72,14 +72,12 @@ Command    Input    Output    Safe
 ./nn 0 1   [0,1]    0         Closed
 ./nn 0 0   [0,0]    0         Closed
 
-
 Your Mental Model (Use This!)
 Think of your C program as a tiny brain inside a safe.
 It watches two key slots.
 Only when both are filled (1,1) → it says "OPEN!"
 The weights are like how much it trusts each key.
 Backpropagation = teaching it to trust both keys equally.
-
 
 Bonus: Real-World Uses of This Pattern
 Problem        Input 1          Input 2          Output
@@ -88,7 +86,7 @@ Game move      Player near (1)  Enemy weak (1)   Attack
 Alarm          Motion (1)       Door open (1)    Sound
 
 Final Summary (Your Metaphor)
-./nn 1 1  →  "Both keys in!" → Brain computes → ReLU → Output > 0 → "SAFE OPENS!"
+./nn 1 1  →  "Both keys in!"  → Brain computes → ReLU → Output > 0 → "SAFE OPENS!"
 ./nn 1 0  →  "Missing a key!" → ReLU blocks → Output = 0 → "STAYS CLOSED"
 
 */
@@ -107,8 +105,8 @@ Final Summary (Your Metaphor)
 // z needs to be near from the target.
 
 // Define constants for initial values
-#define INIT_W1    0.3  // Initial weight for input 1
-#define INIT_W2    0.4  // Initial weight for input 2
+#define INIT_W1    0.3   // Initial weight for input 1
+#define INIT_W2    0.4   // Initial weight for input 2
 #define INIT_BIAS  -0.5  // Initial bias (threshold)
 
 // Define learning rate
@@ -122,10 +120,14 @@ Final Summary (Your Metaphor)
 // ReLU Activation Function - (rectifier)
 // -----------------------------
 // ReLU: Rectified Linear Unit
-// It outputs the input directly if it is positive; otherwise, it will output zero.
-// If z > 0 → z, else → 0
+// It outputs the input directly if it is positive; 
+// otherwise, it will output zero.
+// If z > 0 → z, 
+//     else → 0
+//
 // See:
 // https://en.wikipedia.org/wiki/Rectified_linear_unit
+
 double relu(double z) 
 {
     return (z > 0) ? z : 0;
@@ -137,10 +139,12 @@ double relu(double z)
 // So: the values returned by relu_derivative (0.0 or 1.0) are 
 // not related to the target values directly. 
 // They’re related to the activation state of the neuron. 
+// If z > 0 → slope=1, 
+//     else → slope=0
 
 double relu_derivative(double z) 
 {
-    return (z > 0) ? 1.0 : 0.0;  // If z > 0 → slope=1, else → slope=0
+    return (z > 0) ? 1.0 : 0.0;
 }
 
 // -----------------------------
@@ -157,10 +161,17 @@ double relu_derivative(double z)
    - Weight - Control how much each input matters.
    - Bias   - The bias, which shifts the threshold for activation.
 
-    Weights: how much each input matters
-    Trust levels: (w1, w2) tell the neuron how strongly to believe each input.
-    Effect: Larger 'wi' means that input pushes the neuron’s decision more.
-    Interpretation: If w1 > w2, the neuron trusts x1 more than x2.
+  Weights: 
+    How much each input matters
+
+  Trust levels: 
+    (w1, w2) tell the neuron how strongly to believe each input.
+
+  Effect: 
+    Larger 'wi' means that input pushes the neuron’s decision more.
+
+  Interpretation: 
+    If w1 > w2, the neuron trusts x1 more than x2.
 
 -----------------------------------
 3. Linear Combination
@@ -191,14 +202,19 @@ Mental Model Recap
 int main(int argc, char *argv[]) 
 {
 
-    // === 1. Check command line input ===
-    if (argc != 3) {
+
+// === 1. Check command line input ===
+// We need 3 arguments
+
+    if (argc != 3) 
+	{
         printf("Usage: %s <input1> <input2>\n", argv[0]);
         printf("Example: %s 1 1\n", argv[0]);
-        return 1;
+        goto fail;
     }
 
-    // === 2. Read two inputs from command line ===
+// === 2. Read two inputs from command line ===
+
     double x1 = atof(argv[1]);  // First input
     double x2 = atof(argv[2]);  // Second input
     double inputs[2] = {x1, x2};
@@ -206,11 +222,12 @@ int main(int argc, char *argv[])
     printf("=== Neural Network Training (AND Logic) ===\n");
     printf("Input: [%.0f, %.0f]\n", x1, x2);
 
-    // === 3. Define target (correct answer) ===
-    // It’s the “truth” or “label” in machine learning terms.
-    // We need to get a smaller error changing the weights 
-    // when the target was reached.
-    // We want: 1 1 → YES (1), others → NO (0)
+// === 3. Define target (correct answer) ===
+// It’s the “truth” or “label” in machine learning terms.
+// We need to get a smaller error 
+// changing the weights when the target was reached.
+// We want: 
+//    1 1 → YES (1), others → NO (0)
 
     //double target = (x1 == 1.0 && x2 == 1.0) ? 1.0 : 0.0;
     double target = 
@@ -221,7 +238,7 @@ int main(int argc, char *argv[])
     printf("Target output: %.0f\n", target);
 
 
-    // === 4. Initialize weights and bias (randomly or fixed) ===
+// === 4. Initialize weights and bias (randomly or fixed) ===
 /*
     double w1 = 0.3;   // Weight for input 1
     double w2 = 0.4;   // Weight for input 2
@@ -229,22 +246,37 @@ int main(int argc, char *argv[])
     double learning_rate = 0.5;  // How much to adjust per step
 */
 
-    double w1 = INIT_W1;  // Initial weight for input 1
-    double w2 = INIT_W2;  // Initial weight for input 2
-    double b  = INIT_BIAS;
+    double w1 = INIT_W1;    // Initial weight for input 1
+    double w2 = INIT_W2;    // Initial weight for input 2
+    double b  = INIT_BIAS;  // Initial BIAS
 
     double learning_rate = LEARNING_RATE;
 
-    printf("\nInitial weights: w1=%.3f, w2=%.3f, bias=%.3f\n", w1, w2, b);
+    printf("\n");
+    printf("Initial weights: w1=%.3f, w2=%.3f, bias=%.3f\n", 
+	    w1, w2, b );
 
-    // === 5. Forward pass BEFORE training ===
-    double z = w1 * x1 + w2 * x2 + b;        // Linear combination
-    double prediction = relu(z);            // Apply ReLU
-    printf("\nBEFORE training: z = %.3f → output = %.3f\n", z, prediction);
 
-    // === 6. TRAINING LOOP (10 epochs) ===
-    printf("\n--- Training Start (Backpropagation) ---\n");
-    for (int epoch = 1; epoch <= EPOCH_MAX; epoch++) {
+// === 5. Forward pass BEFORE training ===
+
+// The z value
+// Linear combination
+    double z = w1 * x1 + w2 * x2 + b;
+
+// Apply ReLU
+    double prediction = relu(z);
+
+    printf("\nBEFORE training: z = %.3f → output = %.3f\n", 
+	    z, prediction );
+
+// === 6. TRAINING LOOP (10 epochs) ===
+
+    printf("\n");
+    printf("--- Training Start (Backpropagation) ---\n");
+
+    int epoch=1;
+    for (epoch = 1; epoch <= EPOCH_MAX; epoch++) 
+	{
         // ---- Forward Pass ----
         z = w1 * inputs[0] + w2 * inputs[1] + b;
         double output = relu(z);
@@ -296,4 +328,8 @@ int main(int argc, char *argv[])
     printf("w1=%.6f, w2=%.6f, bias=%.6f\n", w1, w2, b);
 
     return 0;
+fail:
+    return 1;
 }
+
+
